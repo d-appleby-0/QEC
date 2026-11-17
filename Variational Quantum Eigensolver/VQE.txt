@@ -1,0 +1,57 @@
+What is a VQE?
+    Uses classical and quantum computing in tandem to accomplish a task with the following components:
+        Operator: often a Hamiltonian 'H' that represents the aspect of your system which you seek to optimize - VQE seeks 
+        to find the "ground state" eigenvector which correspionds to the minimum eigenvalue
+            Hamiltonian: generally used in physics to descirbe energy states but generalizes in quantum computing to a 
+            business or logistical problem - can be solved on small scal ebut becomes incalculable for large systems
+        
+        Ansatz: The family of quantum circuits which are instantiated to approximate the eigenvalue you are seeking via the 
+        combined quantum state
+            In VQE: the quantum circuit used to approximate the multi-qubit wave function whihc best approximates the "ground
+            state of the system in question an dproduces the lowest expectation value of 'H'
+        
+        Estimator: Means of estimating the cost function (expectation value) of the operator 'H' 
+            Expecttation value: probability-weighted average of the system's eigenenergies
+        
+        A classical optimizer to minimize the cost function by varying parameters
+
+Breakdown:
+    Initally a theta parameter vector on which the unitary operation of the ansatz is called U_var(theta_0)
+    
+    While the lowest energy could be estimated simply by measuring repeatedly and smapling the lowest, we lkely also want the
+    configuration which yeilds the lowest energy/eigenvalue. As such, we take quantum measurements to estimate the
+    ecpecttation value of 'H'
+
+    By making many measurements of the Pauli operators making up the Hamiltonian, we estimate the expectation value in the 
+    current state
+
+    It is often advantageous to start the system from a better guess than |0>⊗N, such as by using the Hartree-Fock state
+
+    Since one cannot often measure the entire Hmailtonian directly due to non-commuting Pauli X, Y, and Z operators, we 
+    measure groups of operators simultaneosuly and combine the results to obtain the expectation value. 
+        IBM Quantum primitive Estimator can be used to perform this task efficiently
+
+    Classical optimizers are utilized to search through the parameter space to minimze the output of a particular function,
+    with some utilizing gradient information and others not. Commonly used optimizers include Adam, AMSGrad, and SPSA, which
+    are each useful in noisy environments like qubit measurements
+
+    A common workflow is to pass the cost function, the set of parameters, and the arguments suhc as the ansatz, Hamiltonian, 
+    and Estimator into a minimzer like scipy minimize() with the minimizer method specified
+
+    Since a variational state can never yield an eignevalue lower than that of the ground state, the aproximation relies on
+    closeness to this threshold
+
+    In classical computing, it is computationally trivial to set or update parameters, however it is challenging to find 
+    relevant ones that are physically motivated. Additionally, the most expensve single step is the calculation of the 
+    expectation value for the given state since this involves an NxN matrix acting on a vector of N elements
+
+Quantum workflow:
+    On a quantum computer, one could prepare the quantum state using the variational ansatz and then make measurements.
+
+    Summing the weighted measurements of commuting Pauli strings allows not only construction of H but propogated standard 
+    deviation and a final expectation value
+
+    There ar epossible imitations in that this is only efficent for relatively small numbers of groups of commuting Pauli
+    operators. Given too many, this approach becomes inefficient. Additionally, one might want to perform more operations 
+    in general as a way to reduce the uncertainty in a calculation, which is reintroduced through use of a quantum computer.
+
